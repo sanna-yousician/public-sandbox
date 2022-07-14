@@ -1,0 +1,25 @@
+name: Magic word trigger
+
+on:
+  pull_request_target:
+    types: [labeled, ready_for_review]
+    branches: [ main ]
+
+jobs:
+  TunaPrSmokeTrigger:
+    if: |
+        (github.event.action == 'labeled' && github.event.label.name == 'Plop' && github.event.pull_request.draft == false)
+        || (github.event.action == 'ready_for_review' && contains(github.event.pull_request.labels.*.name, 'Plop'))
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add trigger comment to PR
+      uses: actions/github-script@v2
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.createComment({
+            issue_number: ${{ github.event.number }},
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Triggering stuff using a magic word in PR comments.'
+          })
